@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>License Plate Recognition Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 50px;
+        }
+
+        h2 {
+            color: #555;
+            margin-top: 30px;
+        }
+
+        img {
+            display: block;
+            margin: 20px auto;
+            max-width: 100%;
+            border: 2px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        p {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>License Plate Recognition Result</h1>
+    <h2>Uploaded Image</h2>
+    <img id="uploaded-image" src="{{ image_file }}" alt="Uploaded Image">
+    
+    <h2>License Plate Number:</h2>
+    <p>{{ ocr_result }}</p>
+
+    <script>
+        // Retrieve image from local storage and set it to the img tag
+        document.getElementById('uploaded-image').src = localStorage.getItem('uploadedImage');
+    </script>
+</body>
+</html>
