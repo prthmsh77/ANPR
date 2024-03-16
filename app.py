@@ -5,6 +5,7 @@ from PIL import Image
 import easyocr
 import tempfile
 import os
+from openpyxl import Workbook, load_workbook
 
 app = Flask(__name__)
 
@@ -72,49 +73,40 @@ model = load_model()
 model = set_model_parameters(model)
 reader = initialize_easyocr()
 
+
+
+# Initialize EasyOCR reader
+reader = initialize_easyocr()
+
+# Create an Excel workbook if it doesn't exist, otherwise load existing workbook
+if not os.path.exists("ocr_results.xlsx"):
+    wb = Workbook()
+    ws = wb.active
+    ws.append(["OCR Result"])  # Add header row if creating a new workbook
+else:
+    wb = load_workbook("ocr_results.xlsx")
+    ws = wb.active
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
         file = request.files['file']
         if file:
-            # Save uploaded image
             img_path = os.path.join('uploads', file.filename)
             file.save(img_path)
-
-            # Load YOLOv5 model
-            
-
-            # Perform inference
-            
             results = inference(model, img_path)
-            # Parse results
-            boxes, scores, categories = parse_results(results)
-
-            # Find index of bounding box with highest score
+            boxes, scores = parse_results(results)
             max_score_index = find_max_score_index(scores)
-
-            # Extract bounding box with highest score
             x1, y1, x2, y2 = extract_bounding_box(boxes, max_score_index)
-
-            # Load original image
             original_image = load_original_image(img_path)
-
-            # Crop region of interest from original image
             cropped_image = crop_region_of_interest(original_image, x1, y1, x2, y2)
-
-            # Convert cropped image to PIL format and save to temporary file
             temp_img_path = convert_to_pil_and_save(cropped_image)
-
-            # Initialize EasyOCR reader
-           
-
-            # Perform OCR on cropped image
             ocr_result = perform_ocr(reader, temp_img_path)
-            ocr_clean = ocr_result.replace("*", " ").replace("@", " ").replace(".", " ").replace("'"," ").upper()
-
+            ocr_clean = ocr_result.replace("*", " ").replace("@", " ").replace(".", " ").replace("'", " ").upper()
+            ws.append([ocr_clean])
+            wb.save("ocr_results.xlsx")
             return render_template('result.html', image_file=img_path, ocr_result=ocr_clean)
-
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
